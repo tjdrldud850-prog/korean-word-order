@@ -1,0 +1,390 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Free Korean word order practice: tap the cards, match the colors, watch the verb move to the end.">
+<title>Korean Word Order Cards</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap">
+<style>
+/* Layout: one centered study table — settings bar, English sentence, answer tray, shuffled card pool, verdict */
+:root{
+  --bg:#f3f1ec; --surface:#fffdf8; --ink:#22242a; --muted:#6b6e78; --line:#ddd8cc; --accent:#2f5d8a;
+  --s:#2f6fd0; --v:#d0443a; --o:#2c9a5b; --p:#b47a12; --t:#8a52c4; --x:#16878f; --pt:#6b6e78;
+  --s-bg:#e6efff; --v-bg:#ffe9e6; --o-bg:#e3f6eb; --p-bg:#fbf0d9; --t-bg:#f1e8fb; --x-bg:#dff3f4; --pt-bg:#ecebe6;
+  --good:#2c9a5b; --bad:#d0443a;
+  --display:"Black Han Sans","IBM Plex Sans KR",system-ui,sans-serif;
+  --body:"IBM Plex Sans KR",system-ui,-apple-system,"Apple SD Gothic Neo",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#17181c; --surface:#212328; --ink:#ecebe6; --muted:#a2a4ad; --line:#363941; --accent:#8db6e6;
+  --s:#7fb0ff; --v:#ff8a80; --o:#6fd49c; --p:#f0be5b; --t:#c9a2f2; --x:#6fd3d9; --pt:#b5b7bf;
+  --s-bg:#1f2c45; --v-bg:#3d2422; --o-bg:#1c3a2a; --p-bg:#3a2f18; --t-bg:#2f2440; --x-bg:#173638; --pt-bg:#2c2e34;
+  --good:#6fd49c; --bad:#ff8a80; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#17181c; --surface:#212328; --ink:#ecebe6; --muted:#a2a4ad; --line:#363941; --accent:#8db6e6;
+  --s:#7fb0ff; --v:#ff8a80; --o:#6fd49c; --p:#f0be5b; --t:#c9a2f2; --x:#6fd3d9; --pt:#b5b7bf;
+  --s-bg:#1f2c45; --v-bg:#3d2422; --o-bg:#1c3a2a; --p-bg:#3a2f18; --t-bg:#2f2440; --x-bg:#173638; --pt-bg:#2c2e34;
+  --good:#6fd49c; --bad:#ff8a80; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 48px}
+.wrap{max-width:740px;margin:0 auto;display:grid;gap:18px}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(28px,6vw,40px);margin:0;line-height:1.1;text-wrap:balance}
+h1 small{display:block;font-family:var(--body);font-size:14px;color:var(--muted);font-weight:500;letter-spacing:.02em;margin-top:6px}
+.settings{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center}
+.settings label{font-size:14px;color:var(--muted);display:flex;align-items:center;gap:6px}
+select{font:inherit;font-size:14px;padding:6px 8px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.toggle{cursor:pointer;user-select:none}
+.toggle input{width:18px;height:18px;accent-color:var(--accent)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:12px;height:12px;border-radius:3px;display:inline-block}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;display:grid;gap:16px}
+.label{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.top{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.progress{font-variant-numeric:tabular-nums}
+.en{display:flex;flex-wrap:wrap;gap:8px;font-size:clamp(19px,4.5vw,25px);font-weight:500}
+.chip{padding:3px 10px;border-radius:8px;border-bottom:3px solid}
+.tray{min-height:70px;border:2px dashed var(--line);border-radius:12px;padding:10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.tray.empty::before{content:"Tap the Korean cards below in order";color:var(--muted);font-size:14px;padding-left:4px}
+.pool{display:flex;flex-wrap:wrap;gap:8px;min-height:56px}
+.card{font:inherit;font-size:19px;font-weight:700;padding:9px 14px;border-radius:10px;border:2px solid;cursor:pointer;display:inline-flex;flex-direction:column;align-items:center;line-height:1.2;transition:transform .12s}
+.card:hover{transform:translateY(-2px)}
+.card:focus-visible,button:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.card .gl{font-size:12px;font-weight:500;opacity:.85;margin-top:3px}
+.p-s{color:var(--s);background:var(--s-bg);border-color:var(--s)}
+.p-v{color:var(--v);background:var(--v-bg);border-color:var(--v)}
+.p-o{color:var(--o);background:var(--o-bg);border-color:var(--o)}
+.p-p{color:var(--p);background:var(--p-bg);border-color:var(--p)}
+.p-t{color:var(--t);background:var(--t-bg);border-color:var(--t)}
+.p-x{color:var(--x);background:var(--x-bg);border-color:var(--x)}
+.p-pt{color:var(--pt);background:var(--pt-bg);border-color:var(--pt);border-style:dashed}
+.actions{display:flex;flex-wrap:wrap;gap:10px}
+button.btn{font:inherit;font-weight:700;font-size:15px;padding:10px 18px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+button.btn:disabled{opacity:.45;cursor:not-allowed}
+.verdict{border-radius:12px;padding:16px;display:grid;gap:10px;border:2px solid}
+.verdict.good{border-color:var(--good)} .verdict.bad{border-color:var(--bad)}
+.verdict h2{margin:0;font-family:var(--display);font-weight:400;font-size:26px}
+.verdict.good h2{color:var(--good)} .verdict.bad h2{color:var(--bad)}
+.compare{display:grid;grid-template-columns:auto 1fr;gap:8px 12px;align-items:center;font-size:15px}
+.compare .row{display:flex;flex-wrap:wrap;gap:6px}
+.note{font-size:14px;color:var(--muted);margin:0}
+.ko-line{display:flex;flex-wrap:wrap;gap:6px;font-size:18px;font-weight:700}
+footer{text-align:center}
+footer a{color:var(--accent)}
+@media (prefers-reduced-motion:reduce){.card{transition:none}.card:hover{transform:none}}
+</style>
+<style>body{margin:0}[hidden]{display:none!important}img{max-width:100%}</style>
+</head>
+<body>
+
+
+<div class="wrap">
+  <h1>Korean Word Order Cards<small>Match the colors. Watch the verb move to the end.</small></h1>
+
+  <div class="settings">
+    <label for="level">Level
+      <select id="level">
+        <option value="1">Easy · 3 cards</option>
+        <option value="2">Medium · 4 cards</option>
+        <option value="3">Hard · particles split</option>
+      </select></label>
+    <label for="theme">Theme
+      <select id="theme">
+        <option value="rnd" selected>🎲 Random (endless)</option>
+        <option value="all">All themes</option>
+        <option value="D">Daily life</option>
+        <option value="F">Food &amp; restaurants</option>
+        <option value="S">Shopping &amp; stores</option>
+        <option value="R">Getting around</option>
+        <option value="T">Travel</option>
+        <option value="K">K-drama lines</option>
+      </select></label>
+    <label for="casual" class="toggle"><input type="checkbox" id="casual"> Casual speech (반말)</label>
+    <label for="beginner" class="toggle"><input type="checkbox" id="beginner" checked> Show meanings</label>
+  </div>
+
+  <div class="legend" aria-label="Color key">
+    <span><i style="background:var(--s)"></i>Subject</span>
+    <span><i style="background:var(--v)"></i>Verb</span>
+    <span><i style="background:var(--o)"></i>Object</span>
+    <span><i style="background:var(--p)"></i>Place</span>
+    <span><i style="background:var(--t)"></i>Time</span>
+    <span><i style="background:var(--x)"></i>Other (how / with)</span>
+    <span><i style="background:var(--pt)"></i>Particle</span>
+  </div>
+
+  <section class="panel" aria-live="polite">
+    <div class="top"><span class="label">English</span><span class="label progress" id="progress"></span></div>
+    <div class="en" id="en"></div>
+    <span class="label">Your Korean sentence</span>
+    <div class="tray empty" id="tray"></div>
+    <span class="label">Cards</span>
+    <div class="pool" id="pool"></div>
+    <div class="actions">
+      <button class="btn primary" id="check">Check</button>
+      <button class="btn" id="reset">Reset</button>
+      <button class="btn" id="listen" hidden>🔊 Listen</button>
+      <button class="btn" id="next">Next sentence →</button>
+    </div>
+    <div id="verdict" hidden></div>
+  </section>
+  <p class="note">Korean word order is flexible in speech, but the verb almost always comes last. If your order is natural but not the basic one, you'll see the basic order too. In Hard mode the little particles (는, 를, 에서…) are separate cards: they stick to the word right before them.</p>
+  <footer class="note">Made by a Korean ajussi · <a href="https://www.reddit.com/r/KoreanAjussiTips/">r/KoreanAjussiTips</a> · free forever<br>License: <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a>. Free to use and share with credit. Selling it or using it in a paid app or course is not allowed.</footer>
+</div>
+
+<script>
+// Format: THEME > english chunks (pos:text) > korean cards in basic order (pos:polite~casual, "+" marks a particle)
+// pos: s subject, v verb, o object, p place, t time, x other
+const RAW=`
+D>s:I;v:wake up;t:at 7>s:저+는~나+는;t:7시+에;v:일어나요~일어나
+D>s:I;v:drink;o:water>s:저+는~나+는;o:물+을;v:마셔요~마셔
+D>s:My dog;v:sleeps;p:on the sofa>s:우리 개+는;p:소파+에서;v:자요~자
+D>s:I;v:study;o:Korean;t:every day>s:저+는~나+는;t:매일;o:한국어+를;v:공부해요~공부해
+D>s:She;v:listens to;o:music>s:그녀+는;o:음악+을;v:들어요~들어
+D>s:We;v:clean;o:the house;t:on Saturday>s:우리+는;t:토요일+에;o:집+을;v:청소해요~청소해
+D>s:I;v:take;o:a shower;t:at night>s:저+는~나+는;t:밤+에;o:샤워+를;v:해요~해
+D>s:My brother;v:plays;o:games>s:제 동생+은~내 동생+은;o:게임+을;v:해요~해
+D>s:I;v:watch;o:the news;t:in the morning>s:저+는~나+는;t:아침+에;o:뉴스+를;v:봐요~봐
+D>s:I;v:walk;o:my dog;p:in the park>s:저+는~나+는;p:공원+에서;o:강아지+를;v:산책시켜요~산책시켜
+D>s:I;v:am tired;t:today>s:저+는~나+는;t:오늘;v:피곤해요~피곤해
+D>s:My mom;v:calls;o:me;t:every night>s:엄마+가;t:매일 밤;o:저+한테~나+한테;v:전화해요~전화해
+D>s:I;v:don't eat;o:breakfast>s:저+는~나+는;o:아침+을;v:안 먹어요~안 먹어
+D>s:We;v:live;p:in Seoul>s:우리+는;p:서울+에;v:살아요~살아
+D>s:I;v:work;p:at a company>s:저+는~나+는;p:회사+에서;v:일해요~일해
+D>s:The baby;v:is crying;t:now>s:아기+가;t:지금;v:울어요~울어
+D>s:I;v:do;o:laundry;t:on Sunday>s:저+는~나+는;t:일요일+에;o:빨래+를;v:해요~해
+D>s:My sister;v:likes;o:cats>s:제 여동생+은~내 여동생+은;o:고양이+를;v:좋아해요~좋아해
+D>s:I;v:go;p:to the gym;t:after work>s:저+는~나+는;t:퇴근 후+에;p:헬스장+에;v:가요~가
+D>s:I;v:watch;o:TV;x:with my family>s:저+는~나+는;x:가족+이랑;o:TV+를;v:봐요~봐
+D>s:I;v:go to;o:sleep>s:저+는~나+는;o:자러;v:가요~가
+F>s:I;v:eat;o:kimchi>s:저+는~나+는;o:김치+를;v:먹어요~먹어
+F>s:She;v:drinks;o:coffee>s:그녀+는;o:커피+를;v:마셔요~마셔
+F>s:My mom;v:cooks;o:ramyeon>s:엄마+가;o:라면+을;v:끓여요~끓여
+F>s:I;v:ate;o:bibimbap;t:yesterday>s:저+는~나+는;t:어제;o:비빔밥+을;v:먹었어요~먹었어
+F>s:We;v:ordered;o:chicken>s:우리+는;o:치킨+을;v:시켰어요~시켰어
+F>s:I;v:can't eat;o:spicy food>s:저+는~나+는;o:매운 음식+을;v:못 먹어요~못 먹어
+F>s:Dad;v:grills;o:meat;p:in the yard>s:아빠+가;p:마당+에서;o:고기+를;v:구워요~구워
+F>s:I;v:want to eat;o:tteokbokki>s:저+는~나+는;o:떡볶이+가;v:먹고 싶어요~먹고 싶어
+F>s:We;v:eat;o:samgyeopsal;t:on Friday>s:우리+는;t:금요일+에;o:삼겹살+을;v:먹어요~먹어
+F>s:This restaurant;x:is really;v:delicious>s:이 식당+은;x:정말;v:맛있어요~맛있어
+F>s:I;v:drink;o:soju;x:with friends>s:저+는~나+는;x:친구들+이랑;o:소주+를;v:마셔요~마셔
+F>s:My friend;v:makes;o:kimbap;t:every morning>s:제 친구+는~내 친구+는;t:매일 아침;o:김밥+을;v:만들어요~만들어
+F>s:I;v:paid;p:at the counter>s:저+는~나+는;p:카운터+에서;v:계산했어요~계산했어
+F>s:The staff;v:brought;o:the menu>s:직원+이;o:메뉴판+을;v:가져왔어요~가져왔어
+F>s:I;v:don't drink;o:coffee;t:at night>s:저+는~나+는;t:밤+에;o:커피+를;v:안 마셔요~안 마셔
+F>s:We;v:waited;t:30 minutes;p:at the restaurant>s:우리+는;p:식당+에서;t:30분 동안;v:기다렸어요~기다렸어
+F>s:I;v:ate;o:naengmyeon;t:for lunch>s:저+는~나+는;t:점심+에;o:냉면+을;v:먹었어요~먹었어
+F>s:She;v:doesn't like;o:cucumbers>s:그녀+는;o:오이+를;v:안 좋아해요~안 좋아해
+F>s:I;v:ordered;o:delivery;t:at midnight>s:저+는~나+는;t:자정+에;o:배달+을;v:시켰어요~시켰어
+F>s:My grandma;v:makes;o:kimchi;t:every winter>s:할머니+가;t:매년 겨울+에;o:김치+를;v:담가요~담가
+F>s:We;v:had;o:chimaek;p:by the Han River>s:우리+는;p:한강+에서;o:치맥+을;v:먹었어요~먹었어
+F>s:I;v:want;o:more rice>s:저+는~나+는;o:밥+을;x:더;v:먹고 싶어요~먹고 싶어
+S>s:I;v:buy;o:water;p:at the convenience store>s:저+는~나+는;p:편의점+에서;o:물+을;v:사요~사
+S>s:I;v:bought;o:a T-money card>s:저+는~나+는;o:티머니 카드+를;v:샀어요~샀어
+S>s:She;v:bought;o:a lipstick;p:at Olive Young>s:그녀+는;p:올리브영+에서;o:립스틱+을;v:샀어요~샀어
+S>s:I;v:need;o:a bag>s:저+는~나+는;o:봉투+가;v:필요해요~필요해
+S>s:We;v:went;p:to Daiso;t:yesterday>s:우리+는;t:어제;p:다이소+에;v:갔어요~갔어
+S>s:The store;v:closes;t:at 10>s:가게+는;t:10시+에;v:닫아요~닫아
+S>s:I;v:paid;x:by card>s:저+는~나+는;x:카드+로;v:결제했어요~결제했어
+S>s:I;v:want to buy;o:this shirt>s:저+는~나+는;o:이 셔츠+를;v:사고 싶어요~사고 싶어
+S>s:My friend;v:got;o:a discount>s:제 친구+는~내 친구+는;o:할인+을;v:받았어요~받았어
+S>s:I;v:heated;o:the lunchbox;p:in the microwave>s:저+는~나+는;p:전자레인지+에;o:도시락+을;v:데웠어요~데웠어
+S>s:The cashier;v:gave;x:me;o:a receipt>s:직원+이;x:저+한테~나+한테;o:영수증+을;v:줬어요~줬어
+S>s:I;v:exchanged;o:money;p:at the bank>s:저+는~나+는;p:은행+에서;o:돈+을;v:환전했어요~환전했어
+S>s:We;v:shop;p:at the market;t:on weekends>s:우리+는;t:주말+에;p:시장+에서;v:장을 봐요~장을 봐
+S>s:This;x:is too;v:expensive>s:이것+은;x:너무;v:비싸요~비싸
+S>s:I;v:returned;o:the shoes>s:저+는~나+는;o:신발+을;v:환불했어요~환불했어
+S>s:Mom;v:bought;o:apples;p:at E-mart>s:엄마+가;p:이마트+에서;o:사과+를;v:샀어요~샀어
+S>s:I;v:charged;o:my card;p:at the station>s:저+는~나+는;p:역+에서;o:카드+를;v:충전했어요~충전했어
+S>s:I;v:grabbed;x:one more;o:drink>s:저+는~나+는;o:음료수+를;x:하나 더;v:가져왔어요~가져왔어
+R>s:The bus;v:comes;t:at 3>s:버스+가;t:3시+에;v:와요~와
+R>s:I;v:take;o:the subway;t:every day>s:저+는~나+는;t:매일;o:지하철+을;v:타요~타
+R>s:I;v:transferred;p:at Seoul Station>s:저+는~나+는;p:서울역+에서;v:갈아탔어요~갈아탔어
+R>s:We;v:took;o:a taxi;p:to the hotel>s:우리+는;p:호텔+까지;o:택시+를;v:탔어요~탔어
+R>s:The train;v:leaves;t:at 9>s:기차+는;t:9시+에;v:출발해요~출발해
+R>s:I;v:got off;p:at the wrong stop>s:저+는~나+는;p:잘못된 정류장+에서;v:내렸어요~내렸어
+R>s:The subway;v:is crowded;t:in the morning>s:지하철+은;t:아침+에;v:붐벼요~붐벼
+R>s:I;v:rode;o:a bike;p:by the river>s:저+는~나+는;p:강변+에서;o:자전거+를;v:탔어요~탔어
+R>s:My dad;v:goes;x:by car;p:to work>s:아빠+는;x:차+로;p:회사+에;v:가요~가
+R>s:I;v:waited for;o:the bus;t:for 20 minutes>s:저+는~나+는;t:20분 동안;o:버스+를;v:기다렸어요~기다렸어
+R>s:The airport bus;v:goes;p:to Gangnam>s:공항버스+는;p:강남+까지;v:가요~가
+R>s:I;v:tapped;o:my card>s:저+는~나+는;o:카드+를;v:찍었어요~찍었어
+R>s:We;v:arrived;p:in Busan;t:at night>s:우리+는;t:밤+에;p:부산+에;v:도착했어요~도착했어
+R>s:I;v:missed;o:the last train>s:저+는~나+는;o:막차+를;v:놓쳤어요~놓쳤어
+R>s:She;v:goes;p:to Busan;x:by KTX>s:그녀+는;x:KTX+로;p:부산+에;v:가요~가
+R>s:The driver;v:opened;o:the trunk>s:기사님+이;o:트렁크+를;v:열어 주셨어요~열어 주셨어
+T>s:I;v:want to go;p:to Seoul>s:저+는~나+는;p:서울+에;v:가고 싶어요~가고 싶어
+T>s:We;v:went;p:to Gyeongbokgung;t:yesterday>s:우리+는;t:어제;p:경복궁+에;v:갔어요~갔어
+T>s:I;v:took;o:photos;p:in Bukchon>s:저+는~나+는;p:북촌+에서;o:사진+을;v:찍었어요~찍었어
+T>s:My friend;v:lives;p:in Busan>s:제 친구+는~내 친구+는;p:부산+에;v:살아요~살아
+T>s:We;v:stayed;p:at a guesthouse>s:우리+는;p:게스트하우스+에서;v:묵었어요~묵었어
+T>s:I;v:wore;o:a hanbok;p:at the palace>s:저+는~나+는;p:궁+에서;o:한복+을;v:입었어요~입었어
+T>s:We;v:went up;p:Namsan;t:at sunset>s:우리+는;t:해 질 녘+에;p:남산+에;v:올라갔어요~올라갔어
+T>s:I;v:lost;o:my passport>s:저+는~나+는;o:여권+을;v:잃어버렸어요~잃어버렸어
+T>s:She;v:swam;p:at Haeundae Beach>s:그녀+는;p:해운대+에서;v:수영했어요~수영했어
+T>s:I;v:booked;o:a hotel;p:in Myeongdong>s:저+는~나+는;p:명동+에;o:호텔+을;v:예약했어요~예약했어
+T>s:We;v:will go;p:to Jeju;t:next week>s:우리+는;t:다음 주+에;p:제주도+에;v:갈 거예요~갈 거야
+T>s:I;v:asked for;o:directions;p:at the info center>s:저+는~나+는;p:안내소+에서;o:길+을;v:물어봤어요~물어봤어
+T>s:The festival;v:starts;t:tomorrow>s:축제+는;t:내일;v:시작해요~시작해
+T>s:I;v:saw;o:cherry blossoms;t:in April>s:저+는~나+는;t:4월+에;o:벚꽃+을;v:봤어요~봤어
+T>s:We;v:went;o:hiking;t:on Sunday>s:우리+는;t:일요일+에;o:등산+을;v:갔어요~갔어
+T>s:I;v:bought;o:souvenirs;p:in Insadong>s:저+는~나+는;p:인사동+에서;o:기념품+을;v:샀어요~샀어
+T>s:My parents;v:are coming;p:to Korea;t:this winter>s:부모님+이;t:이번 겨울+에;p:한국+에;v:오세요~오셔
+K>s:I;v:like;o:you>s:저+는~나+는;o:당신+을~너+를;v:좋아해요~좋아해
+K>s:I;v:missed;o:you;x:so much>s:저+는~나+는;o:당신+이~네+가;x:너무;v:보고 싶었어요~보고 싶었어
+K>s:He;v:broke up;x:with her;t:last night>s:그+는;t:어젯밤+에;x:그녀+와;v:헤어졌어요~헤어졌어
+K>s:I;v:will protect;o:you>s:제+가~내+가;o:당신+을~너+를;v:지킬게요~지킬게
+K>x:Please;v:don't leave;o:me>x:제발;o:저+를~나+를;v:떠나지 마세요~떠나지 마
+K>s:I;v:fell for;o:you;x:at first sight>s:저+는~나+는;x:첫눈+에;o:당신+한테~너+한테;v:반했어요~반했어
+K>s:We;v:met;p:at the hospital;t:ten years ago>s:우리+는;t:10년 전+에;p:병원+에서;v:만났어요~만났어
+K>s:My heart;v:is pounding;t:right now>s:심장+이;t:지금;v:두근거려요~두근거려
+K>s:She;v:cried;t:all night>s:그녀+는;t:밤새;v:울었어요~울었어
+K>s:The chaebol heir;v:bought;o:the whole company>s:재벌 2세+가;o:회사 전체+를;v:샀어요~샀어
+K>s:I;v:will wait for;o:you;t:forever>s:저+는~나+는;t:영원히;o:당신+을~너+를;v:기다릴게요~기다릴게
+K>s:You;v:are;o:my first love>s:당신+은~너+는;o:제 첫사랑~내 첫사랑;v:이에요~이야
+K>s:We;v:made a promise;p:under the stars>s:우리+는;p:별빛 아래+에서;v:약속했어요~약속했어
+K>s:I;v:saw;o:you;p:in my dream>s:저+는~나+는;p:꿈+에서;o:당신+을~너+를;v:봤어요~봤어
+K>s:He;v:is hiding;o:a secret>s:그+는;o:비밀+을;v:숨기고 있어요~숨기고 있어
+`.trim().split("\n");
+
+const PG={"는":"topic","은":"topic","이":"subject","가":"subject","을":"object","를":"object","에서":"at / in","에":"at / to","한테":"to","이랑":"with","랑":"with","와":"with","로":"by","으로":"by","까지":"up to"};
+
+// ---- Random sentence generator: verb tables + slot tables, particles picked by the last syllable ----
+const jong=w=>{const c=w.charCodeAt(w.length-1);return(c>=0xAC00&&c<=0xD7A3)?(c-0xAC00)%28:0};
+const TOP=w=>jong(w)?"은":"는",OBJ=w=>jong(w)?"을":"를";
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const SUBJ=[["I","저","나",0],["We","우리","",0],["She","그녀","",1],["He","그","",1],["My friend","제 친구","내 친구",1],["My mom","엄마","",1],["My dad","아빠","",1],["My brother","제 동생","내 동생",1],["My sister","제 여동생","내 여동생",1]];
+const TIMES=[["today","오늘","a"],["yesterday","어제","x"],["every day","매일","p"],["on Saturday","토요일+에","a"],["at night","밤+에","a"],["in the morning","아침+에","a"],["after work","퇴근 후+에","a"],["on weekends","주말+에","p"],["last night","어젯밤+에","x"],["every morning","매일 아침","p"],["last week","지난주+에","x"]];
+const XS=[["with my family","가족+이랑"],["alone","혼자"],["with my coworkers","동료들+이랑"],["with my dog","강아지+랑"]];
+const HOME=["at home","집"],CAFE=["at a cafe","카페"],LIB=["at the library","도서관"];
+const VERBS=[
+ {en:["eat","eats","ate"],ko:["먹어요","먹어","먹었어요","먹었어"],th:"F",o:[["kimchi","김치"],["bibimbap","비빔밥"],["tteokbokki","떡볶이"],["ramyeon","라면"],["fried chicken","치킨"],["samgyeopsal","삼겹살"],["naengmyeon","냉면"],["gimbap","김밥"],["bulgogi","불고기"]],pl:[HOME,["at a restaurant","식당"],["at the market","시장"],["by the Han River","한강"],["at the office","회사"]]},
+ {en:["drink","drinks","drank"],ko:["마셔요","마셔","마셨어요","마셨어"],th:"F",o:[["coffee","커피"],["water","물"],["soju","소주"],["banana milk","바나나우유"],["green tea","녹차"],["beer","맥주"],["makgeolli","막걸리"]],pl:[HOME,CAFE,["at a pub","술집"],["by the Han River","한강"]]},
+ {en:["buy","buys","bought"],ko:["사요","사","샀어요","샀어"],th:"S",o:[["snacks","과자"],["water","물"],["a T-shirt","티셔츠"],["flowers","꽃"],["ramyeon","라면"],["socks","양말"],["fruit","과일"],["an umbrella","우산"]],pl:[["at the convenience store","편의점"],["at the market","시장"],["at E-mart","이마트"],["at Daiso","다이소"]]},
+ {en:["watch","watches","watched"],ko:["봐요","봐","봤어요","봤어"],th:"D",o:[["a movie","영화"],["a K-drama","드라마"],["a baseball game","야구 경기"],["the news","뉴스"],["YouTube","유튜브"]],pl:[HOME,["at a friend's house","친구 집"]]},
+ {en:["read","reads","read"],ko:["읽어요","읽어","읽었어요","읽었어"],th:"D",o:[["a book","책"],["a webtoon","웹툰"],["a novel","소설"],["the newspaper","신문"]],pl:[HOME,LIB,CAFE,["on the subway","지하철"]]},
+ {en:["meet","meets","met"],ko:["만나요","만나","만났어요","만났어"],th:"D",o:[["a friend","친구"],["a coworker","동료"],["the teacher","선생님"],["a client","고객"]],pl:[CAFE,["at Gangnam Station","강남역"],["at the office","회사"],["in Hongdae","홍대"]]},
+ {en:["study","studies","studied"],ko:["공부해요","공부해","공부했어요","공부했어"],th:"D",o:[["Korean","한국어"],["English","영어"],["math","수학"],["history","역사"]],pl:[HOME,LIB,CAFE]},
+ {en:["make","makes","made"],ko:["만들어요","만들어","만들었어요","만들었어"],th:"F",o:[["gimbap","김밥"],["kimchi stew","김치찌개"],["Korean pancakes","전"],["tteokbokki","떡볶이"]],pl:[HOME,["in the kitchen","부엌"]]},
+ {en:["wash","washes","washed"],ko:["씻어요","씻어","씻었어요","씻었어"],th:"D",o:[["the dishes","설거지"],["the car","차"],["fruit","과일"]],pl:[HOME,["in the kitchen","부엌"]]},
+ {en:["go","goes","went"],ko:["가요","가","갔어요","갔어"],th:"R",go:1,pl:[["to school","학교"],["to work","회사"],["to Busan","부산"],["to the gym","헬스장"],["to Myeongdong","명동"],["to the hospital","병원"],["to Jeju","제주도"],["to the beach","바다"]]},
+ {en:["come","comes","came"],ko:["와요","와","왔어요","왔어"],th:"T",go:1,pl:[["to Korea","한국"],["to Seoul","서울"],["to my house","우리 집"],["to the office","회사"]]}
+];
+// "wash the dishes" is 설거지를 하다 in Korean — swap the verb for that one object
+function gen(n){
+  let v=pick(VERBS);const s=pick(SUBJ);
+  const opts=shuffle(v.go?["t","x"]:["p","t"]).slice(0,Math.max(0,n-3));
+  const useT=opts.includes("t"),useX=opts.includes("x"),useP=v.go||opts.includes("p");
+  let tense=Math.random()<.5?"p":"x",T=null;
+  if(useT){T=pick(TIMES);if(T[2]!=="a")tense=T[2]}
+  const O=v.go?null:pick(v.o);
+  let ko4=v.ko;if(O&&O[1]==="설거지")ko4=["해요","해","했어요","했어"];
+  const enV=tense==="x"?v.en[2]:(s[3]?v.en[1]:v.en[0]);
+  const kv=tense==="x"?ko4[2]+"~"+ko4[3]:ko4[0]+"~"+ko4[1];
+  const en=[{pos:"s",text:s[0]},{pos:"v",text:enV}],ko=[{pos:"s",text:s[1]+"+"+TOP(s[1])+(s[2]?"~"+s[2]+"+"+TOP(s[2]):"")}];
+  const PL=useP?pick(v.pl):null,X=useX?pick(XS):null;
+  if(O)en.push({pos:"o",text:O[0]});
+  if(PL)en.push({pos:"p",text:PL[0]});
+  if(X)en.push({pos:"x",text:X[0]});
+  if(T)en.push({pos:"t",text:T[0]});
+  if(T)ko.push({pos:"t",text:T[1]});
+  if(X)ko.push({pos:"x",text:X[1]});
+  if(PL)ko.push({pos:"p",text:PL[1]+"+"+(v.go?"에":"에서")});
+  if(O)ko.push({pos:"o",text:O[1]+"+"+OBJ(O[1])});
+  ko.push({pos:"v",text:kv});
+  return{th:v.th,en,ko};
+}
+let rnd=false,count=0;
+const pairs=s=>s.split(";").map(x=>{const k=x.indexOf(":");return{pos:x.slice(0,k),text:x.slice(k+1)}});
+const DATA=RAW.map(l=>{const [th,en,ko]=l.split(">");return{th,en:pairs(en),ko:pairs(ko)}});
+const $=id=>document.getElementById(id);
+let list=[],li=0,cur=null,cards=[],placed=[],pool=[],done=false;
+
+function shuffle(a){a=a.slice();for(let k=a.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[a[k],a[j]]=[a[j],a[k]]}return a}
+function lv(){return +$("level").value}
+function genN(){const L=lv();return L===1?3:L===2?4:(Math.random()<.5?4:5)}
+function advance(){if(rnd){count++;cur=gen(genN())}else{li=(li+1)%list.length;cur=list[li]}start()}
+function buildList(){
+  const th=$("theme").value,L=lv();
+  rnd=th==="rnd";
+  if(rnd){count=1;cur=gen(genN());start();return}
+  list=shuffle(DATA.filter(d=>(th==="all"||d.th===th)&&(L===3||d.en.length===(L===1?3:4))));
+  li=0;if(!list.length){list=shuffle(DATA.filter(d=>th==="all"||d.th===th))}
+  cur=list[0];start();
+}
+function makeCards(d){
+  const cas=$("casual").checked,hard=lv()===3,out=[];
+  d.ko.forEach((c,u)=>{
+    const parts=c.text.split("~"),txt=(cas&&parts[1]?parts[1]:parts[0]);
+    const gl=(d.en.find(e=>e.pos===c.pos)||{}).text||"";
+    if(hard&&txt.includes("+")){const [w,p]=txt.split("+");out.push({t:w,pos:c.pos,gl,u});out.push({t:p,pos:"pt",gl:PG[p]||"particle",u})}
+    else out.push({t:txt.replace("+",""),pos:c.pos,gl,u});
+  });
+  return out;
+}
+function start(){
+  cards=makeCards(cur);placed=[];done=false;
+  const idx=cards.map((_,k)=>k);
+  do{pool=shuffle(idx)}while(pool.join()===idx.join()&&idx.length>1);
+  $("verdict").hidden=true;render();
+}
+function cardEl(k,where){
+  const c=cards[k],b=document.createElement("button");
+  b.className="card p-"+c.pos;b.type="button";
+  b.innerHTML=`<span>${c.t}</span>`+($("beginner").checked&&c.gl?`<span class="gl">(${c.gl})</span>`:"");
+  b.setAttribute("aria-label",c.t+(where==="pool"?", add":", remove"));
+  b.onclick=()=>{if(done)return;
+    if(where==="pool"){pool=pool.filter(x=>x!==k);placed.push(k)}else{placed=placed.filter(x=>x!==k);pool.push(k)}
+    render()};
+  return b;
+}
+function render(){
+  $("progress").textContent=rnd?`🎲 Sentence ${count}`:`${li+1} / ${list.length}`;
+  $("en").innerHTML=cur.en.map(e=>`<span class="chip p-${e.pos}">${e.text}</span>`).join("");
+  const t=$("tray");t.innerHTML="";placed.forEach(k=>t.appendChild(cardEl(k,"tray")));t.classList.toggle("empty",!placed.length);
+  const p=$("pool");p.innerHTML="";pool.forEach(k=>p.appendChild(cardEl(k,"pool")));
+  $("check").disabled=done||placed.length!==cards.length;
+}
+function units(){const m=[];cards.forEach(c=>{(m[c.u]=m[c.u]||{pos:null,t:[]}).t.push(c.t);if(c.pos!=="pt")m[c.u].pos=c.pos});return m}
+function spoken(){return units().map(u=>u.t.join("")).join(" ")}
+function natural(seq){
+  const us=units(),verb=us.find(u=>u.pos==="v");
+  const vt=verb.t;if(seq.slice(-vt.length).join("\u0001")!==vt.join("\u0001"))return false;
+  const rest=us.filter(u=>u!==verb).map(u=>u.t);
+  const go=(s,r)=>{if(!s.length)return!r.length;for(let k=0;k<r.length;k++){const u=r[k];if(s.slice(0,u.length).join("\u0001")===u.join("\u0001")&&go(s.slice(u.length),r.filter((_,j)=>j!==k)))return true}return false};
+  return go(seq.slice(0,seq.length-vt.length),rest);
+}
+function line(order){return order.map(k=>`<span class="chip p-${cards[k].pos}">${cards[k].t}</span>`).join("")}
+function tone(seq){try{const ctx=new (window.AudioContext||window.webkitAudioContext)();let t=ctx.currentTime;
+  seq.forEach(([f,d])=>{const o=ctx.createOscillator(),g=ctx.createGain();o.frequency.value=f;g.gain.setValueAtTime(.25,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g);g.connect(ctx.destination);o.start(t);o.stop(t+d);t+=d*.8})}catch(e){}}
+let koVoice=null;
+function findVoice(){try{koVoice=speechSynthesis.getVoices().find(v=>/^ko/i.test(v.lang))||null}catch(e){koVoice=null}$("listen").hidden=!koVoice}
+try{findVoice();speechSynthesis.onvoiceschanged=findVoice}catch(e){}
+function say(text){if(!koVoice)return;try{const u=new SpeechSynthesisUtterance(text);u.voice=koVoice;u.lang=koVoice.lang;u.rate=.85;speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){}}
+
+$("check").onclick=()=>{
+  const seq=placed.map(k=>cards[k].t),basic=cards.map(c=>c.t);
+  const exact=seq.join("\u0001")===basic.join("\u0001"),nat=!exact&&natural(seq);
+  done=true;const v=$("verdict");v.hidden=false;
+  const allIdx=cards.map((_,k)=>k);
+  const cmp=`<div class="compare"><span class="label">English</span><div class="row">${cur.en.map(e=>`<span class="chip p-${e.pos}">${e.text}</span>`).join("")}</div><span class="label">Korean</span><div class="row">${line(allIdx)}</div></div>`;
+  if(exact){v.className="verdict good";v.innerHTML=`<h2>딩동댕! Correct</h2>${cmp}<p class="note">The <b style="color:var(--v)">verb</b> moved to the end. That's Korean.</p>`;tone([[784,.25],[659,.25],[523,.45]])}
+  else if(nat){v.className="verdict good";v.innerHTML=`<h2>Good! Natural Korean</h2><div class="ko-line">${line(placed)}</div><p class="note">That works in conversation. The basic order is:</p>${cmp}`;tone([[659,.25],[784,.35]])}
+  else{v.className="verdict bad";v.innerHTML=`<h2>땡! Not quite</h2><div class="ko-line">${line(placed)}</div><p class="note">The <b style="color:var(--v)">verb</b> goes last${lv()===3?", and each particle sticks to the word before it":""}. Here's the basic order:</p>${cmp}`;tone([[180,.4]])}
+  say(spoken());render();
+};
+$("reset").onclick=start;
+$("next").onclick=advance;
+$("listen").onclick=()=>say(spoken());
+$("beginner").onchange=render;
+$("casual").onchange=start;
+$("level").onchange=buildList;
+$("theme").onchange=buildList;
+buildList();
+</script>
+
+</body>
+</html>
