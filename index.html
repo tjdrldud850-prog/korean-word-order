@@ -46,6 +46,9 @@ select{font:inherit;font-size:14px;padding:6px 8px;border-radius:8px;border:1px 
 .progress{font-variant-numeric:tabular-nums}
 .en{display:flex;flex-wrap:wrap;gap:8px;font-size:clamp(19px,4.5vw,25px);font-weight:500}
 .chip{padding:3px 10px;border-radius:8px;border-bottom:3px solid}
+.chip.drop{opacity:.45;text-decoration:line-through}
+.en .br{flex-basis:100%;height:0}
+.dropnote{font-size:13px;color:var(--muted);flex-basis:100%;font-weight:400}
 .tray{min-height:70px;border:2px dashed var(--line);border-radius:12px;padding:10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .tray.empty::before{content:"Tap the Korean cards below in order";color:var(--muted);font-size:14px;padding-left:4px}
 .pool{display:flex;flex-wrap:wrap;gap:8px;min-height:56px}
@@ -91,6 +94,7 @@ footer a{color:var(--accent)}
         <option value="1">Easy · 3 cards</option>
         <option value="2">Medium · 4 cards</option>
         <option value="3">Hard · particles split</option>
+        <option value="4">Intermediate · 2 sentences</option>
       </select></label>
     <label for="theme">Theme
       <select id="theme">
@@ -133,7 +137,7 @@ footer a{color:var(--accent)}
     </div>
     <div id="verdict" hidden></div>
   </section>
-  <p class="note">Korean word order is flexible in speech, but the verb almost always comes last. If your order is natural but not the basic one, you'll see the basic order too. In Hard mode the little particles (는, 를, 에서…) are separate cards: they stick to the word right before them.</p>
+  <p class="note">Korean word order is flexible in speech, but the verb almost always comes last. If your order is natural but not the basic one, you'll see the basic order too. In Hard mode the little particles (는, 를, 에서…) are separate cards: they stick to the word right before them. Intermediate gives you two sentences at once, with particles split. Each sentence ends with its own verb.</p>
   <footer class="note">Made by a Korean ajussi · <a href="https://www.reddit.com/r/KoreanAjussiTips/">r/KoreanAjussiTips</a> · free forever<br>License: <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a>. Free to use and share with credit. Selling it or using it in a paid app or course is not allowed.</footer>
 </div>
 
@@ -183,7 +187,7 @@ F>s:She;v:doesn't like;o:cucumbers>s:그녀+는;o:오이+를;v:안 좋아해요~
 F>s:I;v:ordered;o:delivery;t:at midnight>s:저+는~나+는;t:자정+에;o:배달+을;v:시켰어요~시켰어
 F>s:My grandma;v:makes;o:kimchi;t:every winter>s:할머니+가;t:매년 겨울+에;o:김치+를;v:담가요~담가
 F>s:We;v:had;o:chimaek;p:by the Han River>s:우리+는;p:한강+에서;o:치맥+을;v:먹었어요~먹었어
-F>s:I;v:want;o:more rice>s:저+는~나+는;o:밥+을;x:더;v:먹고 싶어요~먹고 싶어
+F>s:I;v:want;x:more;o:rice>s:저+는~나+는;o:밥+을;x:더;v:먹고 싶어요~먹고 싶어
 S>s:I;v:buy;o:water;p:at the convenience store>s:저+는~나+는;p:편의점+에서;o:물+을;v:사요~사
 S>s:I;v:bought;o:a T-money card>s:저+는~나+는;o:티머니 카드+를;v:샀어요~샀어
 S>s:She;v:bought;o:a lipstick;p:at Olive Young>s:그녀+는;p:올리브영+에서;o:립스틱+을;v:샀어요~샀어
@@ -250,6 +254,36 @@ K>s:You;v:are;o:my first love>s:당신+은~너+는;o:제 첫사랑~내 첫사랑
 K>s:We;v:made a promise;p:under the stars>s:우리+는;p:별빛 아래+에서;v:약속했어요~약속했어
 K>s:I;v:saw;o:you;p:in my dream>s:저+는~나+는;p:꿈+에서;o:당신+을~너+를;v:봤어요~봤어
 K>s:He;v:is hiding;o:a secret>s:그+는;o:비밀+을;v:숨기고 있어요~숨기고 있어
+K>x:What pulls out;o:the thorn stuck in your heart;v:is only;s:a friend's hand>o:마음에 박힌 가시+를;x:^빼주는 것+은;s:친구의 손;v:밖에 없어요~밖에 없다
+`.trim().split("\n");
+
+// Intermediate: two sentences per line. THEME > en1 > ko1 > en2 > ko2
+// "~" before an English chunk = dropped in Korean. "^" before a Korean chunk = ends a clause (stays before what follows).
+const RAW2=`
+D>s:I;v:wake up;t:at seven every day>s:저+는~나+는;t:매일 7시+에;v:일어나요~일어나>s:~I;x:eat breakfast and;v:drink;o:a cup of coffee>x:^아침을 먹고;o:커피 한 잔+을;v:마셔요~마셔
+D>t:Today;s:I;v:am very tired>s:저+는~나+는;t:오늘;v:너무 피곤해요~너무 피곤해>s:~I;v:want to go to bed;x:early;t:tonight>t:오늘 밤+에;x:일찍;v:자고 싶어요~자고 싶어
+D>s:My sister;v:is;p:in the kitchen>s:제 여동생+은~내 여동생+은;p:부엌+에;v:있어요~있어>s:~She;v:is making;o:dinner;x:for the family>x:가족을 위해;o:저녁+을;v:만들고 있어요~만들고 있어
+S>t:Yesterday;s:I;v:went;p:to the supermarket>s:저+는~나+는;t:어제;p:마트+에;v:갔어요~갔어>s:~I;v:bought;o:some bread, milk, and eggs>o:빵이랑 우유랑 계란+을;v:샀어요~샀어
+D>s:My best friend;v:lives;p:near my house>s:제 제일 친한 친구+는~내 제일 친한 친구+는;p:우리 집 근처+에;v:살아요~살아>s:We;x:often;v:meet;t:after school or work>s:우리+는;t:학교나 회사 끝나고;x:자주;v:만나요~만나
+T>t:Last weekend;s:I;v:visited;p:my grandparents>s:저+는~나+는;t:지난 주말+에;p:할머니 할아버지 댁+에;v:갔어요~갔어>s:We;x:had lunch together and;v:talked;t:for hours>s:우리+는;x:^같이 점심을 먹고;t:몇 시간 동안;v:이야기했어요~이야기했어
+D>s:My brother;v:likes;o:playing football>s:제 동생+은~내 동생+은;o:축구하는 것+을;v:좋아해요~좋아해>s:~He;v:plays;x:with his friends;t:every Saturday>t:토요일마다;x:친구들+이랑;v:축구해요~축구해
+D>s:I;x:called;o:my friend;t:yesterday;v:but she didn't answer>s:저+는~나+는;t:어제;o:친구+한테;x:^전화했는데;v:안 받았어요~안 받았어>x:Maybe;s:~she;v:was busy>x:아마;v:바빴나 봐요~바빴나 봐
+F>x:I am hungry, but;v:there is nothing;o:to eat;p:at home>x:^배고픈데;p:집+에;o:먹을 게;v:없어요~없어>s:~I;v:need to go;p:to the grocery store>p:마트+에;v:가야 해요~가야 해
+F>s:My mother;v:is making;o:pasta;t:for dinner>s:엄마+가;t:저녁+으로;o:파스타+를;v:만들고 있어요~만들고 있어>s:I;v:am helping;o:her;p:in the kitchen>s:저+는~나+는;p:부엌+에서;o:엄마+를;v:돕고 있어요~돕고 있어
+F>s:We;v:went;p:to a restaurant;t:last night>s:우리+는;t:어젯밤+에;p:식당+에;v:갔어요~갔어>s:The food;x:was good, but;s:the prices;v:were quite high>s:음식+은;x:^맛있었는데;s:가격+이;v:꽤 비쌌어요~꽤 비쌌어
+F>s:I;x:usually;v:don't eat;o:breakfast;p:at home>s:저+는~나+는;x:보통;p:집+에서;o:아침+을;v:안 먹어요~안 먹어>s:~I;v:prefer to eat;o:something;p:at work>p:회사+에서;o:뭔가;v:먹는 게 더 좋아요~먹는 게 더 좋아
+D>s:I;v:have a lot of;o:work;t:today>s:저+는~나+는;t:오늘;o:일+이;v:많아요~많아>s:~I;v:hope I can finish;o:everything;t:before five>t:5시 전+에;o:다;v:끝냈으면 좋겠어요~끝냈으면 좋겠어
+D>s:She;v:is learning;o:English;x:because she wants to travel more>s:그녀+는;x:여행을 더 하고 싶어서;o:영어+를;v:배우고 있어요~배우고 있어>s:~She;v:practises;x:a little;t:every day>t:매일;x:조금씩;v:연습해요~연습해
+D>t:Yesterday;s:I;v:forgot;o:my homework;p:at home>s:저+는~나+는;t:어제;o:숙제+를;p:집+에;v:두고 왔어요~두고 왔어>s:My teacher;x:was not very;v:happy>s:선생님+이;x:별로;v:안 좋아하셨어요~안 좋아하셨어
+D>s:I;v:don't understand;o:this question>s:저+는~나+는;o:이 질문+이;v:이해가 안 돼요~이해가 안 돼>v:Can you explain;o:~it;x:to me>x:저+한테~나+한테;v:설명해 주실 수 있어요?~설명해 줄 수 있어?
+S>s:I;v:need;o:a new jacket;x:because my old one is too small>s:저+는~나+는;x:예전 재킷이 너무 작아서;o:새 재킷+이;v:필요해요~필요해>s:~I;v:want to buy;o:one;t:this weekend>t:이번 주말+에;o:하나;v:사고 싶어요~사고 싶어
+S>s:These shoes;x:look nice, but;s:~they;v:are too expensive>s:이 신발+은;x:^예쁜데;v:너무 비싸요~너무 비싸>s:~I;v:will look for;o:a cheaper pair>o:더 싼 거+를;v:찾아볼게요~찾아볼게
+S>s:I;v:went shopping;x:with my sister;t:yesterday>s:저+는~나+는;t:어제;x:여동생+이랑;v:쇼핑했어요~쇼핑했어>s:~We;x:bought some clothes and;v:had;o:lunch;x:together>x:^옷을 사고;x:같이;o:점심+을;v:먹었어요~먹었어
+S>s:I;v:don't have enough;o:money to buy a new phone>s:저+는~나+는;o:새 핸드폰 살 돈+이;v:부족해요~부족해>s:~I;v:need to save;x:more;o:money;t:first>t:먼저;o:돈+을;x:더;v:모아야 해요~모아야 해
+D>s:I;v:like;o:watching films;t:in the evening>s:저+는~나+는;t:저녁+에;o:영화 보는 것+을;v:좋아해요~좋아해>x:Sometimes;s:~I;v:watch;o:~them;x:with my friends>x:가끔;x:친구들+이랑;v:봐요~봐
+T>t:Yesterday;x:it was sunny, so;s:~we;v:went for a walk>t:어제+는;x:날씨가 좋아서;v:산책했어요~산책했어>s:~We;x:sat in the park and;v:ate;o:ice cream>x:공원에 앉아서;o:아이스크림+을;v:먹었어요~먹었어
+D>s:I;x:usually;v:listen to;o:music;x:when I clean my room>s:저+는~나+는;x:보통;x:방 청소할 때;o:음악+을;v:들어요~들어>s:~It;o:makes the work;x:more;v:fun>o:청소+가;x:더;v:재밌어져요~재밌어져
+D>s:My friends;v:are coming over;t:tonight>s:친구들+이;t:오늘 밤+에;v:놀러 와요~놀러 와>s:~We;x:are going to play games and;v:order;o:pizza>x:^게임하고;o:피자+를;v:시켜 먹을 거예요~시켜 먹을 거야
 `.trim().split("\n");
 
 const PG={"는":"topic","은":"topic","이":"subject","가":"subject","을":"object","를":"object","에서":"at / in","에":"at / to","한테":"to","이랑":"with","랑":"with","와":"with","로":"by","으로":"by","까지":"up to"};
@@ -302,6 +336,9 @@ function gen(n){
 let rnd=false,count=0;
 const pairs=s=>s.split(";").map(x=>{const k=x.indexOf(":");return{pos:x.slice(0,k),text:x.slice(k+1)}});
 const DATA=RAW.map(l=>{const [th,en,ko]=l.split(">");return{th,en:pairs(en),ko:pairs(ko)}});
+const PAIRS=RAW2.map(l=>{const [th,e1,k1,e2,k2]=l.split(">");return{th,en:pairs(e1).concat([{pos:"br",text:""}],pairs(e2)),ko:pairs(k1).concat(pairs(k2))}});
+const live=e=>e.pos!=="br"&&!e.text.startsWith("~");
+function enChips(d){const h=d.en.map(e=>e.pos==="br"?`<span class="br"></span>`:`<span class="chip p-${e.pos}${e.text.startsWith("~")?" drop":""}">${e.text.replace(/^~/,"")}</span>`).join("");return h+(d.en.some(e=>e.text.startsWith("~"))?`<span class="dropnote">Crossed out = usually dropped in Korean</span>`:"")}
 const $=id=>document.getElementById(id);
 let list=[],li=0,cur=null,cards=[],placed=[],pool=[],done=false;
 
@@ -311,19 +348,23 @@ function genN(){const L=lv();return L===1?3:L===2?4:(Math.random()<.5?4:5)}
 function advance(){if(rnd){count++;cur=gen(genN())}else{li=(li+1)%list.length;cur=list[li]}start()}
 function buildList(){
   const th=$("theme").value,L=lv();
-  rnd=th==="rnd";
+  rnd=th==="rnd"&&L!==4;
+  if(L===4){list=shuffle(PAIRS.filter(d=>th==="rnd"||th==="all"||d.th===th));if(!list.length)list=shuffle(PAIRS);li=0;cur=list[0];start();return}
   if(rnd){count=1;cur=gen(genN());start();return}
   list=shuffle(DATA.filter(d=>(th==="all"||d.th===th)&&(L===3||d.en.length===(L===1?3:4))));
   li=0;if(!list.length){list=shuffle(DATA.filter(d=>th==="all"||d.th===th))}
   cur=list[0];start();
 }
 function makeCards(d){
-  const cas=$("casual").checked,hard=lv()===3,out=[];
+  const cas=$("casual").checked,hard=lv()>=3,out=[],seen={};
+  const ens=d.en.filter(live);
   d.ko.forEach((c,u)=>{
-    const parts=c.text.split("~"),txt=(cas&&parts[1]?parts[1]:parts[0]);
-    const gl=(d.en.find(e=>e.pos===c.pos)||{}).text||"";
-    if(hard&&txt.includes("+")){const [w,p]=txt.split("+");out.push({t:w,pos:c.pos,gl,u});out.push({t:p,pos:"pt",gl:PG[p]||"particle",u})}
-    else out.push({t:txt.replace("+",""),pos:c.pos,gl,u});
+    const end=c.text.startsWith("^")||c.pos==="v",raw=c.text.replace(/^\^/,"");
+    const parts=raw.split("~"),txt=(cas&&parts[1]?parts[1]:parts[0]);
+    const n=seen[c.pos]=(seen[c.pos]||0)+1;
+    const gl=(ens.filter(e=>e.pos===c.pos)[n-1]||{}).text||"";
+    if(hard&&txt.includes("+")){const [w,p]=txt.split("+");out.push({t:w,pos:c.pos,gl,u,end});out.push({t:p,pos:"pt",gl:PG[p]||"particle",u,end})}
+    else out.push({t:txt.replace("+",""),pos:c.pos,gl,u,end});
   });
   return out;
 }
@@ -345,19 +386,26 @@ function cardEl(k,where){
 }
 function render(){
   $("progress").textContent=rnd?`🎲 Sentence ${count}`:`${li+1} / ${list.length}`;
-  $("en").innerHTML=cur.en.map(e=>`<span class="chip p-${e.pos}">${e.text}</span>`).join("");
+  $("en").innerHTML=enChips(cur);
   const t=$("tray");t.innerHTML="";placed.forEach(k=>t.appendChild(cardEl(k,"tray")));t.classList.toggle("empty",!placed.length);
   const p=$("pool");p.innerHTML="";pool.forEach(k=>p.appendChild(cardEl(k,"pool")));
   $("check").disabled=done||placed.length!==cards.length;
 }
-function units(){const m=[];cards.forEach(c=>{(m[c.u]=m[c.u]||{pos:null,t:[]}).t.push(c.t);if(c.pos!=="pt")m[c.u].pos=c.pos});return m}
+function units(){const m=[];cards.forEach(c=>{(m[c.u]=m[c.u]||{pos:null,t:[],end:c.end}).t.push(c.t);if(c.pos!=="pt")m[c.u].pos=c.pos});return m}
 function spoken(){return units().map(u=>u.t.join("")).join(" ")}
+// Each clause/sentence = a group ending with its verb (or a "^" clause end). Inside a group any order is fine as long as the end stays last.
 function natural(seq){
-  const us=units(),verb=us.find(u=>u.pos==="v");
-  const vt=verb.t;if(seq.slice(-vt.length).join("\u0001")!==vt.join("\u0001"))return false;
-  const rest=us.filter(u=>u!==verb).map(u=>u.t);
-  const go=(s,r)=>{if(!s.length)return!r.length;for(let k=0;k<r.length;k++){const u=r[k];if(s.slice(0,u.length).join("\u0001")===u.join("\u0001")&&go(s.slice(u.length),r.filter((_,j)=>j!==k)))return true}return false};
-  return go(seq.slice(0,seq.length-vt.length),rest);
+  const J=a=>a.join("\u0001"),gs=[[]];
+  units().forEach(u=>{gs[gs.length-1].push(u);if(u.end)gs.push([])});
+  if(!gs[gs.length-1].length)gs.pop();
+  const go=(s,r)=>{if(!s.length)return!r.length;for(let k=0;k<r.length;k++){const u=r[k];if(J(s.slice(0,u.length))===J(u)&&go(s.slice(u.length),r.filter((_,j)=>j!==k)))return true}return false};
+  let pos=0;
+  for(const g of gs){
+    const n=g.reduce((a,u)=>a+u.t.length,0),part=seq.slice(pos,pos+n),last=g[g.length-1].t;pos+=n;
+    if(J(part.slice(-last.length))!==J(last))return false;
+    if(!go(part.slice(0,n-last.length),g.slice(0,-1).map(u=>u.t)))return false;
+  }
+  return true;
 }
 function line(order){return order.map(k=>`<span class="chip p-${cards[k].pos}">${cards[k].t}</span>`).join("")}
 function tone(seq){try{const ctx=new (window.AudioContext||window.webkitAudioContext)();let t=ctx.currentTime;
@@ -372,10 +420,10 @@ $("check").onclick=()=>{
   const exact=seq.join("\u0001")===basic.join("\u0001"),nat=!exact&&natural(seq);
   done=true;const v=$("verdict");v.hidden=false;
   const allIdx=cards.map((_,k)=>k);
-  const cmp=`<div class="compare"><span class="label">English</span><div class="row">${cur.en.map(e=>`<span class="chip p-${e.pos}">${e.text}</span>`).join("")}</div><span class="label">Korean</span><div class="row">${line(allIdx)}</div></div>`;
+  const cmp=`<div class="compare"><span class="label">English</span><div class="row">${enChips(cur)}</div><span class="label">Korean</span><div class="row">${line(allIdx)}</div></div>`;
   if(exact){v.className="verdict good";v.innerHTML=`<h2>딩동댕! Correct</h2>${cmp}<p class="note">The <b style="color:var(--v)">verb</b> moved to the end. That's Korean.</p>`;tone([[784,.25],[659,.25],[523,.45]])}
   else if(nat){v.className="verdict good";v.innerHTML=`<h2>Good! Natural Korean</h2><div class="ko-line">${line(placed)}</div><p class="note">That works in conversation. The basic order is:</p>${cmp}`;tone([[659,.25],[784,.35]])}
-  else{v.className="verdict bad";v.innerHTML=`<h2>땡! Not quite</h2><div class="ko-line">${line(placed)}</div><p class="note">The <b style="color:var(--v)">verb</b> goes last${lv()===3?", and each particle sticks to the word before it":""}. Here's the basic order:</p>${cmp}`;tone([[180,.4]])}
+  else{v.className="verdict bad";v.innerHTML=`<h2>땡! Not quite</h2><div class="ko-line">${line(placed)}</div><p class="note">The <b style="color:var(--v)">verb</b> goes last in each sentence${lv()>=3?", and each particle sticks to the word before it":""}. Here's the basic order:</p>${cmp}`;tone([[180,.4]])}
   say(spoken());render();
 };
 $("reset").onclick=start;
