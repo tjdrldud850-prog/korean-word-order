@@ -74,6 +74,7 @@ button.btn:disabled{opacity:.45;cursor:not-allowed}
 .ko-line{display:flex;flex-wrap:wrap;gap:6px;font-size:18px;font-weight:700}
 footer{text-align:center}
 footer a{color:var(--accent)}
+.nocolor #tray .card,.nocolor #pool .card{color:var(--ink);background:var(--surface);border-color:var(--line);border-style:solid}
 @media (prefers-reduced-motion:reduce){.card{transition:none}.card:hover{transform:none}}
 </style>
 <style>body{margin:0}[hidden]{display:none!important}img{max-width:100%}</style>
@@ -104,6 +105,7 @@ footer a{color:var(--accent)}
       </select></label>
     <label for="casual" class="toggle"><input type="checkbox" id="casual"> Casual speech (반말)</label>
     <label for="beginner" class="toggle"><input type="checkbox" id="beginner" checked> Show meanings</label>
+    <label for="colors" class="toggle"><input type="checkbox" id="colors" checked> Color cards</label>
   </div>
 
   <div class="legend" aria-label="Color key">
@@ -380,6 +382,7 @@ $("reset").onclick=start;
 $("next").onclick=advance;
 $("listen").onclick=()=>say(spoken());
 $("beginner").onchange=render;
+$("colors").onchange=()=>document.body.classList.toggle("nocolor",!$("colors").checked);
 $("casual").onchange=start;
 $("level").onchange=buildList;
 $("theme").onchange=buildList;
