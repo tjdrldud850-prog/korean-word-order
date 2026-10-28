@@ -107,7 +107,12 @@ footer a{color:var(--accent)}
         <option value="T">Travel</option>
         <option value="K">K-drama lines</option>
       </select></label>
-    <label for="casual" class="toggle"><input type="checkbox" id="casual"> Casual speech (반말)</label>
+    <label for="speech">Talking to
+      <select id="speech">
+        <option value="friend">A friend · 반말</option>
+        <option value="polite" selected>A stranger · 해요</option>
+        <option value="formal">Formal (news, speeches) · 다나까</option>
+      </select></label>
     <label for="beginner" class="toggle"><input type="checkbox" id="beginner" checked> Show meanings</label>
     <label for="colors" class="toggle"><input type="checkbox" id="colors" checked> Color cards</label>
   </div>
@@ -286,6 +291,17 @@ D>s:I;x:usually;v:listen to;o:music;x:when I clean my room>s:저+는~나+는;x:�
 D>s:My friends;v:are coming over;t:tonight>s:친구들+이;t:오늘 밤+에;v:놀러 와요~놀러 와>s:~We;x:are going to play games and;v:order;o:pizza>x:^게임하고;o:피자+를;v:시켜 먹을 거예요~시켜 먹을 거야
 `.trim().split("\n");
 
+// 합쇼체 (다나까) from the 해요체 form: irregular words listed, regular endings by rule
+const FORMAL={"일어나요":"일어납니다","마셔요":"마십니다","자요":"잡니다","들어요":"듣습니다","봐요":"봅니다","산책시켜요":"산책시킵니다","살아요":"삽니다","울어요":"웁니다","가요":"갑니다","끓여요":"끓입니다","구워요":"굽습니다","만들어요":"만듭니다","담가요":"담급니다","사요":"삽니다","닫아요":"닫습니다","비싸요":"비쌉니다","와요":"옵니다","타요":"탑니다","붐벼요":"붐빕니다","오세요":"오십니다","지킬게요":"지키겠습니다","떠나지 마세요":"떠나지 마십시오","두근거려요":"두근거립니다","기다릴게요":"기다리겠습니다","찾아볼게요":"찾아보겠습니다","이에요":"입니다","좋아요":"좋습니다","많아요":"많습니다","돼요":"됩니다","재밌어져요":"재밌어집니다","만나요":"만납니다","해요":"합니다","있어요?":"있습니까?"};
+function formal(p){
+  for(const k of Object.keys(FORMAL).sort((a,b)=>b.length-a.length))if(p.endsWith(k)&&(p.length===k.length||p[p.length-k.length-1]===" "||k.length>2)){return p.slice(0,p.length-k.length)+FORMAL[k]}
+  if(p.endsWith("해요"))return p.slice(0,-2)+"합니다";
+  if(p.endsWith("거예요"))return p.slice(0,-3)+"겁니다";
+  const m=p.match(/^(.*)(.)(어요|아요)$/);
+  if(m){const c=m[2].charCodeAt(0);if(c>=0xAC00&&c<=0xD7A3&&(c-0xAC00)%28)return m[1]+m[2]+"습니다"}
+  return p;
+}
+
 const PG={"는":"topic","은":"topic","이":"subject","가":"subject","을":"object","를":"object","에서":"at / in","에":"at / to","한테":"to","이랑":"with","랑":"with","와":"with","로":"by","으로":"by","까지":"up to"};
 
 // ---- Random sentence generator: verb tables + slot tables, particles picked by the last syllable ----
@@ -356,11 +372,11 @@ function buildList(){
   cur=list[0];start();
 }
 function makeCards(d){
-  const cas=$("casual").checked,hard=lv()>=3,out=[],seen={};
+  const sp=$("speech").value,cas=sp==="friend",hard=lv()>=3,out=[],seen={};
   const ens=d.en.filter(live);
   d.ko.forEach((c,u)=>{
     const end=c.text.startsWith("^")||c.pos==="v",raw=c.text.replace(/^\^/,"");
-    const parts=raw.split("~"),txt=(cas&&parts[1]?parts[1]:parts[0]);
+    const parts=raw.split("~");let txt=(cas&&parts[1]?parts[1]:parts[0]);if(sp==="formal"&&c.pos==="v")txt=formal(txt);
     const n=seen[c.pos]=(seen[c.pos]||0)+1;
     const gl=(ens.filter(e=>e.pos===c.pos)[n-1]||{}).text||"";
     if(hard&&txt.includes("+")){const [w,p]=txt.split("+");out.push({t:w,pos:c.pos,gl,u,end});out.push({t:p,pos:"pt",gl:PG[p]||"particle",u,end})}
@@ -431,7 +447,7 @@ $("next").onclick=advance;
 $("listen").onclick=()=>say(spoken());
 $("beginner").onchange=render;
 $("colors").onchange=()=>document.body.classList.toggle("nocolor",!$("colors").checked);
-$("casual").onchange=start;
+$("speech").onchange=start;
 $("level").onchange=buildList;
 $("theme").onchange=buildList;
 buildList();
